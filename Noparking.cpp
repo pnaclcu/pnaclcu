@@ -1,3 +1,4 @@
+//Compiled by using "g++ lanedec.cpp -o lanedec `pkg-config --cflags --libs opencv`"
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/highgui/highgui.hpp>
@@ -17,7 +18,7 @@ int num=0;
 class LaneDetect
 {
 public:
-    Mat currFrame; //stores the upcoming frame,mat means ¾ØÕó
+    Mat currFrame; //stores the upcoming frame,mat means çŸ©é˜µ
     Mat temp;      //stores intermediate results
     Mat temp2;     //stores the final lane segments
 
@@ -26,7 +27,7 @@ public:
     int diffThreshTop;
     int diffThreshLow;
     int ROIrows;
-    int vertical_left;//vertical=´¹Ö±
+    int vertical_left;//vertical=å‚ç›´
     int vertical_right;
     int vertical_top;
     int smallLaneArea;
@@ -43,25 +44,25 @@ public:
     float bounding_width;
     float bounding_length;
     Size2f sz;//size,2dims,float
-    vector< vector<Point> > contours; //¸¡µãÀàĞÍµÄÂÖÀª¡£×ø±ê
-    vector<Vec4i> hierarchy; //¹Ì¶¨Ğ´·¨£¬ºóÀ´findcontoursËã³ö±ß½çµÄ×ø±ê£¬´æÔÚcontoursÀïÃæ¡£
-    RotatedRect rotated_rect; //Ìî³ä
+    vector< vector<Point> > contours; //æµ®ç‚¹ç±»å‹çš„è½®å»“ã€‚åæ ‡
+    vector<Vec4i> hierarchy; //å›ºå®šå†™æ³•ï¼Œåæ¥findcontoursç®—å‡ºè¾¹ç•Œçš„åæ ‡ï¼Œå­˜åœ¨contoursé‡Œé¢ã€‚
+    RotatedRect rotated_rect; //å¡«å……
 
 
     LaneDetect(Mat startFrame)
     {
         //currFrame = startFrame;                                    //if image has to be processed at original size
 
-        currFrame = Mat(320,480,CV_8UC1,0.0);                        //initialised the image size to 320x480  CV_8UC1---Ôò¿ÉÒÔ´´½¨----8Î»ÎŞ·ûºÅÕûĞÎµÄµ¥Í¨µÀ---»Ò¶ÈÍ¼Æ¬
+        currFrame = Mat(320,480,CV_8UC1,0.0);                        //initialised the image size to 320x480  CV_8UC1---åˆ™å¯ä»¥åˆ›å»º----8ä½æ— ç¬¦å·æ•´å½¢çš„å•é€šé“---ç°åº¦å›¾ç‰‡
         resize(startFrame, currFrame, currFrame.size());             // resize the input to required size
 
-        temp      = Mat(currFrame.rows, currFrame.cols, CV_8UC1,0.0);//stores possible lane markings£¬rowsĞĞ£¬colsÁĞ
+        temp      = Mat(currFrame.rows, currFrame.cols, CV_8UC1,0.0);//stores possible lane markingsï¼Œrowsè¡Œï¼Œcolsåˆ—
         temp2     = Mat(currFrame.rows, currFrame.cols, CV_8UC1,0.0);//stores finally selected lane marks
 
-        vanishingPt    = currFrame.rows/2;                           //for simplicity right now //·ÖÄ¸±ä´ó£¬Ôö¼ÓÌì¿ÕÂÖÀª£¬·ÖÄ¸±äĞ¡£¬Ö»ÈÏÂ·Ãæ
+        vanishingPt    = currFrame.rows/2;                           //for simplicity right now //åˆ†æ¯å˜å¤§ï¼Œå¢åŠ å¤©ç©ºè½®å»“ï¼Œåˆ†æ¯å˜å°ï¼Œåªè®¤è·¯é¢
         ROIrows        = currFrame.rows - vanishingPt;               //rows in region of interest
-        minSize        = 0.0015 * (currFrame.cols*currFrame.rows);  //min size of any region to be selected as lane //ÊıÖµÎª23×óÓÒ
-        maxLaneWidth   = 0.025 * currFrame.cols;                     //approximate max lane width based on image size ¿í¶ÈÎª12ÁĞ×óÓÒ
+        minSize        = 0.0015 * (currFrame.cols*currFrame.rows);  //min size of any region to be selected as lane //æ•°å€¼ä¸º23å·¦å³
+        maxLaneWidth   = 0.025 * currFrame.cols;                     //approximate max lane width based on image size å®½åº¦ä¸º12åˆ—å·¦å³
         smallLaneArea  = 7 * minSize;
         longLane       = 0.7 * currFrame.rows;
         ratio          = 4;
@@ -73,7 +74,7 @@ public:
 
         namedWindow("lane",3);
         namedWindow("midstep", 3);
-        namedWindow("currframe", 3); //name,Êı×ÖÊÇ´°¿Úsize;
+        namedWindow("currframe", 3); //name,æ•°å­—æ˜¯çª—å£size;
         namedWindow("laneBlobs",3);
 		namedWindow("NoParkingArea",5);
 
@@ -85,7 +86,7 @@ public:
         int total=0, average =0;
         for(int i= vanishingPt; i<currFrame.rows; i++)
             for(int j= 0 ; j<currFrame.cols; j++)
-                total += currFrame.at<uchar>(i,j);//total=total+µÚ£¨i£¬j£©µÄ»Ò¶È£¬¼ÆËã160*480µÄ»Ò¶ÈºÍ
+                total += currFrame.at<uchar>(i,j);//total=total+ç¬¬ï¼ˆiï¼Œjï¼‰çš„ç°åº¦ï¼Œè®¡ç®—160*480çš„ç°åº¦å’Œ
         average = total/(ROIrows*currFrame.cols);
         cout<<"average : "<<average<<endl;
     }
@@ -99,7 +100,7 @@ public:
             for(int j=0; j<currFrame.cols; j++)
             {
                 temp.at<uchar>(i,j)    = 0;
-                temp2.at<uchar>(i,j)   = 0;//temp£¬temp2µÄÍ¼Ïñ£¬160*480»Ò¶È±ä³É0£¬ÓÒ°ë±ß±ä³É0
+                temp2.at<uchar>(i,j)   = 0;//tempï¼Œtemp2çš„å›¾åƒï¼Œ160*480ç°åº¦å˜æˆ0ï¼Œå³åŠè¾¹å˜æˆ0
             }
 
         imshow("currframe", currFrame);
@@ -109,7 +110,7 @@ public:
 	{  
 			stringstream stream;  
 			stream<<int_temp;  
-			string_temp=stream.str();   //´Ë´¦Ò²¿ÉÒÔÓÃ stream>>string_temp  
+			string_temp=stream.str();   //æ­¤å¤„ä¹Ÿå¯ä»¥ç”¨ stream>>string_temp  
 	}  
     void markLane()
     {
@@ -124,12 +125,12 @@ public:
             {
 
                 diffL = currFrame.at<uchar>(i,j) - currFrame.at<uchar>(i,j-laneWidth);
-                diffR = currFrame.at<uchar>(i,j) - currFrame.at<uchar>(i,j+laneWidth);//£¨160.5£©Óë£¨160.0£©,£¨160.10£©µÄ²îÖµ£¬£¬£¨160,6£©Óë£¨160,1£©£¬£¨160,11£©ÖĞ¼äµãÓëÁ½±ßµÄ²îÖµ¡£¡£¡£¡£¡£¡£¡£¶à´ÎÑ­»·£¬±éÀú´ó¶àÊı»ù±¾ËùÓĞÏñËØ¡£
-				//×ÜÌåÊÇ¼ÆËãÄ³µãÓëÆäË®Æ½ÁÙ½üÏñËØ·½ÏòÖ®²î
-                diff  =  diffL + diffR - abs(diffL-diffR);//ÖĞ¼äµãÓëÁ½±ßµÄ²îÖµÇóºÍ£¬¼õÈ¥²îÖµÖ®²î
+                diffR = currFrame.at<uchar>(i,j) - currFrame.at<uchar>(i,j+laneWidth);//ï¼ˆ160.5ï¼‰ä¸ï¼ˆ160.0ï¼‰,ï¼ˆ160.10ï¼‰çš„å·®å€¼ï¼Œï¼Œï¼ˆ160,6ï¼‰ä¸ï¼ˆ160,1ï¼‰ï¼Œï¼ˆ160,11ï¼‰ä¸­é—´ç‚¹ä¸ä¸¤è¾¹çš„å·®å€¼ã€‚ã€‚ã€‚ã€‚ã€‚ã€‚ã€‚å¤šæ¬¡å¾ªç¯ï¼Œéå†å¤§å¤šæ•°åŸºæœ¬æ‰€æœ‰åƒç´ ã€‚
+				//æ€»ä½“æ˜¯è®¡ç®—æŸç‚¹ä¸å…¶æ°´å¹³ä¸´è¿‘åƒç´ æ–¹å‘ä¹‹å·®
+                diff  =  diffL + diffR - abs(diffL-diffR);//ä¸­é—´ç‚¹ä¸ä¸¤è¾¹çš„å·®å€¼æ±‚å’Œï¼Œå‡å»å·®å€¼ä¹‹å·®
 
                 //1 right bit shifts to make it 0.5 times
-                diffThreshLow = currFrame.at<uchar>(i,j)>>1; //ÓÒÒÆÒ»Î»£¬³ıÒÔ2£¬£¨£©ÏÂ°ë±ß¶¼³ı2£©
+                diffThreshLow = currFrame.at<uchar>(i,j)>>1; //å³ç§»ä¸€ä½ï¼Œé™¤ä»¥2ï¼Œï¼ˆï¼‰ä¸‹åŠè¾¹éƒ½é™¤2ï¼‰
                 //diffThreshTop = 1.2*currFrame.at<uchar>(i,j);
 
                 //both left and right differences can be made to contribute
@@ -137,7 +138,7 @@ public:
                 //total minimum Diff should be atleast more than 5 to avoid noise
                 if (diffL>0 && diffR >0 && diff>5)
                     if(diff>=diffThreshLow /*&& diff<= diffThreshTop*/ )
-                        temp.at<uchar>(i,j)=255;//¸ù¾İÏñËØ²îÖµÕÒµ½°×Ïß
+                        temp.at<uchar>(i,j)=255;//æ ¹æ®åƒç´ å·®å€¼æ‰¾åˆ°ç™½çº¿
             }
         }
 
@@ -193,11 +194,11 @@ public:
         findContours(binary_image, contours,
                      hierarchy, CV_RETR_CCOMP,
                      CV_CHAIN_APPROX_SIMPLE);
-		//¹Ì¶¨ÓÃ·¨//¿ÉÄÜĞèÒªÔÚÕâÀïÕÒµ½×ø±êµã£¬https://blog.csdn.net/dcrmg/article/details/51987348//
-		//CCOMP¼ì²âËùÓĞÂÖÀª£¬µ«ÊÇÖ»½¨Á¢2¸öµÇ¼Ç¹ØÏµ£¬ÍâÎ§Îª¶¥²ã£¬ÈôÍâÎ§ÂÖÀª°üº¬ÆäËûÂÖÀªĞÅÏ¢£¬ÄÚÎªÂÖÀªÒ²±£´æÎª¶¥²ã¡£
-		//SIMPLE½ö±£´æÂÖÀª¹ÕµãĞÅÏ¢¡£
+		//å›ºå®šç”¨æ³•//å¯èƒ½éœ€è¦åœ¨è¿™é‡Œæ‰¾åˆ°åæ ‡ç‚¹ï¼Œhttps://blog.csdn.net/dcrmg/article/details/51987348//
+		//CCOMPæ£€æµ‹æ‰€æœ‰è½®å»“ï¼Œä½†æ˜¯åªå»ºç«‹2ä¸ªç™»è®°å…³ç³»ï¼Œå¤–å›´ä¸ºé¡¶å±‚ï¼Œè‹¥å¤–å›´è½®å»“åŒ…å«å…¶ä»–è½®å»“ä¿¡æ¯ï¼Œå†…ä¸ºè½®å»“ä¹Ÿä¿å­˜ä¸ºé¡¶å±‚ã€‚
+		//SIMPLEä»…ä¿å­˜è½®å»“æ‹ç‚¹ä¿¡æ¯ã€‚
         // for removing invalid blobs
-        if (!contours.empty()) //ÓĞ±ß½ç¾ÍÏòÏÂÖ´ĞĞ
+        if (!contours.empty()) //æœ‰è¾¹ç•Œå°±å‘ä¸‹æ‰§è¡Œ
         {
             for (size_t i=0; i<contours.size(); ++i)
             {
@@ -218,12 +219,12 @@ public:
                     //so angle needs to be adjusted accordingly
                     blob_angle_deg = rotated_rect.angle;
                     if (bounding_width < bounding_length)
-                        blob_angle_deg = 90 + blob_angle_deg;   //×ª»»½Ç¶È£¬½«widthÓëheight»¥»»¡£±â¾ØĞÎ±ä³É³¤¾ØĞÎ¡£ÒÔXÖáÎªÏŞ£¬ÄæÊ±ÕëÎª¸º½Ç¶È£¬Ë³Ê±ÕëÎªÕı½Ç¶È¡£ËùÒÔ¼Ó90¶È¿ÉÒÔµ÷»»¾ØĞÎ·½Î»Óë¿í¸ß
+                        blob_angle_deg = 90 + blob_angle_deg;   //è½¬æ¢è§’åº¦ï¼Œå°†widthä¸heightäº’æ¢ã€‚æ‰çŸ©å½¢å˜æˆé•¿çŸ©å½¢ã€‚ä»¥Xè½´ä¸ºé™ï¼Œé€†æ—¶é’ˆä¸ºè´Ÿè§’åº¦ï¼Œé¡ºæ—¶é’ˆä¸ºæ­£è§’åº¦ã€‚æ‰€ä»¥åŠ 90åº¦å¯ä»¥è°ƒæ¢çŸ©å½¢æ–¹ä½ä¸å®½é«˜
 
                     //if such big line has been detected then it has to be a (curved or a normal)lane
                     if(bounding_length>longLane || bounding_width >longLane)
                     {
-                        drawContours(currFrame, contours,i, Scalar(255), CV_FILLED, 8);  //¶ÔdrawContours²Ù×÷
+                        drawContours(currFrame, contours,i, Scalar(255), CV_FILLED, 8);  //å¯¹drawContoursæ“ä½œ
                         drawContours(temp2, contours,i, Scalar(255), CV_FILLED, 8);
                     }
 
@@ -234,7 +235,7 @@ public:
                     else if ((blob_angle_deg <-10 || blob_angle_deg >-10 ) &&
                              ((blob_angle_deg > -70 && blob_angle_deg < 70 ) ||
                               (rotated_rect.center.y > vertical_top &&
-                               rotated_rect.center.x > vertical_left && rotated_rect.center.x < vertical_right)))   //Ê¹½Ç¶È²»ÖÁÓÚ¹ı´ó»ò¹ıĞ¡£¬Ç÷½üÓÚX»òYÖá
+                               rotated_rect.center.x > vertical_left && rotated_rect.center.x < vertical_right)))   //ä½¿è§’åº¦ä¸è‡³äºè¿‡å¤§æˆ–è¿‡å°ï¼Œè¶‹è¿‘äºXæˆ–Yè½´
                     {
 
                         if ((bounding_length/bounding_width)>=ratio || (bounding_width/bounding_length)>=ratio
