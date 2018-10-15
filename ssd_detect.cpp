@@ -46,7 +46,7 @@ void int2str(const int &int_temp,string &string_temp)
 	{  
 			stringstream stream;  
 			stream<<int_temp;  
-			string_temp=stream.str();   //此处也可以用 stream>>string_temp  
+			string_temp=stream.str();   
 	}  
 clock_t start, stop; // NOLINT(build/namespaces)
 int sum_row_min = 0;
@@ -73,7 +73,7 @@ public:
     int diffThreshTop;
     int diffThreshLow;
     int ROIrows;
-    int vertical_left;//vertical=垂直
+    int vertical_left;
     int vertical_right;
     int vertical_top;
     int smallLaneArea;
@@ -90,8 +90,8 @@ public:
     float bounding_width;
     float bounding_length;
     Size2f sz;//size,2dims,float
-    vector< vector<Point> > contours; //浮点类型的轮廓。坐标
-    vector<Vec4i> hierarchy; //固定写法，后来findcontours算出边界的坐标，存在contours里面。
+    vector< vector<Point> > contours; 
+    vector<Vec4i> hierarchy; 
     RotatedRect rotated_rect; //填充
 
 
@@ -120,7 +120,7 @@ public:
 
      //   namedWindow("lane",3);
         //namedWindow("midstep", 3);
-        namedWindow("currframe", 3); //name,数字是窗口size;
+        namedWindow("currframe", 3); 
        // namedWindow("laneBlobs",3);
 		//namedWindow("NoParkingArea",5);
 
@@ -146,7 +146,7 @@ public:
 	{  
 			stringstream stream;  
 			stream<<int_temp;  
-			string_temp=stream.str();   //此处也可以用 stream>>string_temp  
+			string_temp=stream.str();   
 	}  
     void markLane()
     {
@@ -230,9 +230,7 @@ public:
         findContours(binary_image, contours,
                      hierarchy, CV_RETR_CCOMP,
                      CV_CHAIN_APPROX_SIMPLE);
-		//固定用法//可能需要在这里找到坐标点，https://blog.csdn.net/dcrmg/article/details/51987348//
-		//CCOMP检测所有轮廓，但是只建立2个登记关系，外围为顶层，若外围轮廓包含其他轮廓信息，内为轮廓也保存为顶层。
-		//SIMPLE仅保存轮廓拐点信息。
+。
         // for removing invalid blobs
         if (!contours.empty()) //有边界就向下执行
         {
